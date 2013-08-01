@@ -1,25 +1,24 @@
 extern mod extra;
 
+use extra::sort::quick_sort;
+use std::io::file_reader;
 use std::path::Path;
-use std::str;
 
 
 fn main() {
-    let reader = std::io::file_reader(&Path("names.txt")).unwrap();
-    let contents = reader.read_whole_stream();
+    let reader = file_reader(&Path("names.txt")).unwrap();
+    let contents = reader.read_c_str();
+    let mut names: ~[&str] = contents.split_iter(',').transform(|x| x.slice(1, x.len() - 1)).collect();
 
-    let split_contents: ~[&[u8]] = contents.split_iter(|x| *x == ',' as u8).collect();
-    let mut names: ~[~str] = split_contents.map(|x| str::from_bytes(x.slice(1, x.len() - 1)));
-
-    extra::sort::quick_sort(names, |a, b| *a <= *b);
+    quick_sort(names, |a, b| a <= b);
 
     let mut counter: int = 0;
     let mut sum: int = 0;
     let first_letter: int = 'A' as int;
 
-    for names.iter().advance |name| {
+    foreach name in names.iter() {
         counter += 1;
-        let name = name.clone();
+        let name = name.to_owned();
         let bytes: ~[u8] = name.to_bytes_with_null();
         let score: int = bytes.iter().fold(0, |a: int, b: &u8| {
             match *b {
