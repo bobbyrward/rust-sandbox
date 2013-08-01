@@ -1,3 +1,4 @@
+use std::cell::Cell;
 use std::rt::io::{Reader, Writer, Listener};
 use std::rt::io::net::tcp::*;
 use std::rt::io::net::ip::*;
@@ -14,20 +15,15 @@ fn main() {
     };
 
     loop {
-        match listener.accept() {
-            Some(stream) => {
-                let mut buf = [1, ..512];
-                let mut stream = stream;
-
-                let read_count = stream.read(buf);
-
-                match read_count {
-                    Some(x) => stream.write(buf.slice_to(x)),
-                    None => (),
-                };
-            },
-            None         => break,
-        };
+        let stream = Cell::new(listener.accept().unwrap());
+        do spawn {
+            let mut buf = [1, ..512];
+            let mut stream = stream.take();
+            match stream.read(buf) {
+                Some(x) => stream.write(buf.slice_to(x)),
+                None => (),
+            };
+        }
     }
 
 }
