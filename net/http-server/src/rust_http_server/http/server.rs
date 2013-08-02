@@ -1,16 +1,31 @@
 extern mod std;
 
+use std::vec;
 use std::cell::Cell;
-use std::rt::io::Listener;
-use std::rt::io::net::tcp::{TcpListener, TcpStream};
+use std::rt::io::{Reader, Writer, Listener};
+use std::rt::io::net::tcp::TcpListener;
 use std::rt::io::net::ip::{IpAddr};
 
-pub type RequestHandler = extern fn(tcp_stream: TcpStream);
+use http::parser::Parser;
+use http::request::Request;
+use http::response::Response;
+
+
+fn allocate_buffer(buffer_size: uint) -> ~[u8] {
+    let mut buffer: ~[u8] = vec::with_capacity(buffer_size);
+    unsafe { vec::raw::set_len(&mut buffer, buffer_size); }
+    return buffer
+}
+
+
+pub type RequestHandler = extern fn(request: Request) -> Response;
+
 
 pub struct HTTPServer {
     bind_address: IpAddr,
     request_handler: RequestHandler
 }
+
 
 impl HTTPServer {
     pub fn new(bind_address: IpAddr, request_handler: RequestHandler) -> HTTPServer {
@@ -30,12 +45,28 @@ impl HTTPServer {
             let handler = self.request_handler;
 
             do spawn {
+                let mut parser = Parser();
+                let mut request = Request::new();
+                let mut dest_buffer = allocate_buffer(512);
+                let mut tcp_stream = stream.take();
 
+                loop {
+                    match tcp_stream.read(dest_buffer) {
+                        Some(x) => {
+                            request.parse(&mut parser, dest_buffer.slice_to(x));
+                        },
+                        None => {
+                            break
+                        },
+                    };
 
-
-                handler(stream.take());
+                    if request.parse_finished {
+                        let mut response = handler(request);
+                        tcp_stream.write(response.to_bytes());
+                        break;
+                    }
+                }
             }
         }
     }
-
 }
