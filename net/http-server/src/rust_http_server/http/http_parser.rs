@@ -353,9 +353,9 @@ static HTTP_PATCH: u32 = 24_u32;
 static HTTP_PURGE: u32 = 25_u32;
 
 pub type enum_http_parser_type = c_uint;
-static HTTP_REQUEST: u32 = 0_u32;
+pub static HTTP_REQUEST: u32 = 0_u32;
 pub static HTTP_RESPONSE: u32 = 1_u32;
-static HTTP_BOTH: u32 = 2_u32;
+pub static HTTP_BOTH: u32 = 2_u32;
 
 pub type enum_flags = c_uint;
 static F_CHUNKED: u32 = 1_u32;

@@ -1,33 +1,41 @@
 extern mod std;
 
-use std::vec;
-use std::vec::raw;
 use std::cell::Cell;
-use std::rt::io::{Reader, Writer, Listener};
+use std::rt::io::Listener;
 use std::rt::io::net::tcp::{TcpListener, TcpStream};
 use std::rt::io::net::ip::{IpAddr};
 
+pub type RequestHandler = extern fn(tcp_stream: TcpStream);
 
-pub fn allocate_buffer(buffer_size: uint) -> ~[u8] {
-    let mut buffer: ~[u8] = std::vec::with_capacity(buffer_size);
-    unsafe { std::vec::raw::set_len(&mut buffer, buffer_size); }
-    return buffer
+pub struct HTTPServer {
+    bind_address: IpAddr,
+    request_handler: RequestHandler
 }
 
+impl HTTPServer {
+    pub fn new(bind_address: IpAddr, request_handler: RequestHandler) -> HTTPServer {
+        HTTPServer { bind_address: bind_address, request_handler: request_handler }
+    }
 
-pub fn serve_forever(bind_address: IpAddr, handle_request: &fn(stream: TcpStream)) {
-    let mut listener = match TcpListener::bind(bind_address) {
-        Some(x) => x,
-        None    => {
-            fail!("Unable to bind to " + bind_address.to_str());
-        }
-    };
+    pub fn serve_forever(&mut self) -> HTTPServer {
+        let mut listener = match TcpListener::bind(self.bind_address) {
+            Some(x) => x,
+            None    => {
+                fail!("Unable to bind to " + self.bind_address.to_str());
+            }
+        };
 
-    loop {
-        let stream = Cell::new(listener.accept().unwrap());
+        loop {
+            let stream = Cell::new(listener.accept().unwrap());
+            let handler = self.request_handler;
 
-        do spawn {
-            handle_request(stream.take());
+            do spawn {
+
+
+
+                handler(stream.take());
+            }
         }
     }
+
 }

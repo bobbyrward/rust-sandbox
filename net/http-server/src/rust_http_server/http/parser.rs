@@ -13,7 +13,7 @@ use http::http_parser::*;
 use std::vec::raw::from_buf_raw;
 use std::libc::{c_int, c_void, c_char, size_t};
 use std::ptr::{null, to_unsafe_ptr};
-use http::http_parser::{http_parser_settings, HTTP_RESPONSE};
+use http::http_parser::{http_parser_settings, HTTP_REQUEST};
 use http::http_parser::{http_parser_init, http_parser_execute};
 
 
@@ -52,7 +52,7 @@ pub fn Parser() -> Parser {
     };
 
     unsafe {
-        http_parser_init(&http_parser, HTTP_RESPONSE);
+        http_parser_init(&http_parser, HTTP_REQUEST);
     }
 
     let settings = struct_http_parser_settings {
