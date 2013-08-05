@@ -9,12 +9,12 @@
 
 //! Higher-level Rust constructs for http_parser
 
-use http::http_parser::*;
+use joyent::http_parser::*;
 use std::vec::raw::from_buf_raw;
 use std::libc::{c_int, c_void, c_char, size_t};
 use std::ptr::{null, to_unsafe_ptr};
-use http::http_parser::{http_parser_settings, HTTP_REQUEST};
-use http::http_parser::{http_parser_init, http_parser_execute};
+use joyent::http_parser::{http_parser_settings, HTTP_REQUEST};
+use joyent::http_parser::{http_parser_init, http_parser_execute};
 
 
 pub type HttpCallback = @fn() -> bool;

@@ -1,6 +1,6 @@
 
-
+#[path = "."]
 pub mod joyent {
-    pub mod http_parser;
     pub mod parser;
+    pub mod http_parser;
 }
