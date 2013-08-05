@@ -1,2 +1,5 @@
 *~
 *.dSYM
+build
+lib
+bin
